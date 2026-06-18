@@ -50,10 +50,36 @@ export const handler = middy()
       updatedTodo
     })
 
-    await updateTodoItem(userId, todoId, updatedTodo)
+    try {
+      await updateTodoItem(userId, todoId, updatedTodo)
 
-    return {
-      statusCode: 204,
-      body: ''
+      logger.info('UpdateTodo request succeeded', {
+        userId,
+        todoId,
+        statusCode: 204
+      })
+
+      return {
+        statusCode: 204,
+        body: ''
+      }
+    } catch (error) {
+      if (error.name === 'ConditionalCheckFailedException') {
+        logger.error('UpdateTodo request failed: todo not found', {
+          userId,
+          todoId
+        })
+        throw new createError.NotFound(`Todo ${todoId} not found`)
+      }
+
+      logger.error('UpdateTodo request failed', {
+        userId,
+        todoId,
+        updatedTodo,
+        errorName: error.name,
+        errorMessage: error.message,
+        stack: error.stack
+      })
+      throw error
     }
   })

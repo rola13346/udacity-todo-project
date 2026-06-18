@@ -26,12 +26,28 @@ export const handler = middy()
       userId
     })
 
-    const items = await getTodosForUser(userId)
+    try {
+      const items = await getTodosForUser(userId)
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify({
-        items
+      logger.info('GetTodos request succeeded', {
+        userId,
+        itemCount: items.length,
+        statusCode: 200
       })
+
+      return {
+        statusCode: 200,
+        body: JSON.stringify({
+          items
+        })
+      }
+    } catch (error) {
+      logger.error('GetTodos request failed', {
+        userId,
+        errorName: error.name,
+        errorMessage: error.message,
+        stack: error.stack
+      })
+      throw error
     }
   })

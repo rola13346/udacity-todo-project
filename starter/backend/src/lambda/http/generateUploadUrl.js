@@ -28,12 +28,37 @@ export const handler = middy()
       todoId
     })
 
-    const uploadUrl = await createAttachmentPresignedUrl(userId, todoId)
+    try {
+      const uploadUrl = await createAttachmentPresignedUrl(userId, todoId)
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify({
-        uploadUrl
+      logger.info('GenerateUploadUrl request succeeded', {
+        userId,
+        todoId,
+        statusCode: 200
       })
+
+      return {
+        statusCode: 200,
+        body: JSON.stringify({
+          uploadUrl
+        })
+      }
+    } catch (error) {
+      if (error.name === 'ConditionalCheckFailedException') {
+        logger.error('GenerateUploadUrl request failed: todo not found', {
+          userId,
+          todoId
+        })
+        throw new createError.NotFound(`Todo ${todoId} not found`)
+      }
+
+      logger.error('GenerateUploadUrl request failed', {
+        userId,
+        todoId,
+        errorName: error.name,
+        errorMessage: error.message,
+        stack: error.stack
+      })
+      throw error
     }
   })

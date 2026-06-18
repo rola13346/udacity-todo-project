@@ -28,10 +28,27 @@ export const handler = middy()
       todoId
     })
 
-    await deleteTodoItem(userId, todoId)
+    try {
+      await deleteTodoItem(userId, todoId)
 
-    return {
-      statusCode: 204,
-      body: ''
+      logger.info('DeleteTodo request succeeded', {
+        userId,
+        todoId,
+        statusCode: 204
+      })
+
+      return {
+        statusCode: 204,
+        body: ''
+      }
+    } catch (error) {
+      logger.error('DeleteTodo request failed', {
+        userId,
+        todoId,
+        errorName: error.name,
+        errorMessage: error.message,
+        stack: error.stack
+      })
+      throw error
     }
   })

@@ -7,7 +7,7 @@ frameworkVersion: '3'
 
 provider:
   name: aws
-  runtime: nodejs16.x
+  runtime: nodejs20.x
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'us-east-1'}
   tracing:
@@ -85,7 +85,6 @@ functions:
       - Effect: Allow
         Action:
           - dynamodb:UpdateItem
-          - dynamodb:GetItem
         Resource:
           - !GetAtt TodosTable.Arn
 
@@ -104,7 +103,6 @@ functions:
       - Effect: Allow
         Action:
           - dynamodb:DeleteItem
-          - dynamodb:GetItem
         Resource:
           - !GetAtt TodosTable.Arn
 
@@ -128,7 +126,6 @@ functions:
       - Effect: Allow
         Action:
           - dynamodb:UpdateItem
-          - dynamodb:GetItem
         Resource:
           - !GetAtt TodosTable.Arn
 

@@ -44,12 +44,29 @@ export const handler = middy()
       newTodo
     })
 
-    const item = await createTodoItem(userId, newTodo)
+    try {
+      const item = await createTodoItem(userId, newTodo)
 
-    return {
-      statusCode: 201,
-      body: JSON.stringify({
-        item
+      logger.info('CreateTodo request succeeded', {
+        userId,
+        todoId: item.todoId,
+        statusCode: 201
       })
+
+      return {
+        statusCode: 201,
+        body: JSON.stringify({
+          item
+        })
+      }
+    } catch (error) {
+      logger.error('CreateTodo request failed', {
+        userId,
+        newTodo,
+        errorName: error.name,
+        errorMessage: error.message,
+        stack: error.stack
+      })
+      throw error
     }
   })

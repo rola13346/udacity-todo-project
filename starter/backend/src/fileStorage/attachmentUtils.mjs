@@ -14,27 +14,55 @@ const bucketName = process.env.ATTACHMENT_S3_BUCKET
 const urlExpiration = parseInt(process.env.SIGNED_URL_EXPIRATION, 10)
 
 export async function getUploadUrl(todoId) {
-  logger.info('Generating upload URL', { todoId, bucketName })
+  logger.info('Generating upload URL', { todoId, bucketName, urlExpiration })
 
-  const command = new PutObjectCommand({
-    Bucket: bucketName,
-    Key: todoId
-  })
+  try {
+    const command = new PutObjectCommand({
+      Bucket: bucketName,
+      Key: todoId
+    })
 
-  return getSignedUrl(s3Client, command, {
-    expiresIn: urlExpiration
-  })
+    const url = await getSignedUrl(s3Client, command, {
+      expiresIn: urlExpiration
+    })
+
+    logger.info('Successfully generated upload URL', { todoId, bucketName })
+
+    return url
+  } catch (error) {
+    logger.error('Failed to generate S3 upload URL', {
+      todoId,
+      bucketName,
+      errorName: error.name,
+      errorMessage: error.message
+    })
+    throw error
+  }
 }
 
 export async function getDownloadUrl(todoId) {
-  const command = new GetObjectCommand({
-    Bucket: bucketName,
-    Key: todoId
-  })
+  try {
+    const command = new GetObjectCommand({
+      Bucket: bucketName,
+      Key: todoId
+    })
 
-  return getSignedUrl(s3Client, command, {
-    expiresIn: urlExpiration
-  })
+    const url = await getSignedUrl(s3Client, command, {
+      expiresIn: urlExpiration
+    })
+
+    logger.info('Successfully generated download URL', { todoId, bucketName })
+
+    return url
+  } catch (error) {
+    logger.error('Failed to generate S3 download URL', {
+      todoId,
+      bucketName,
+      errorName: error.name,
+      errorMessage: error.message
+    })
+    throw error
+  }
 }
 
 export function getAttachmentUrl(todoId) {
